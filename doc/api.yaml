@@ -123,7 +123,7 @@ paths:
           content:
             application/json:
               schema: 
-                $ref: "#/components/schemas/CommentId"
+                $ref: "#/components/schemas/CommentDetails"
         "400":  
           $ref: "#/components/responses/BadRequest"
         "401":
@@ -215,7 +215,7 @@ paths:
           $ref: "#/components/responses/InternalServerError"
       security:
         - bearerAuth: []
-  /users/search:
+  /users:
     get:
       tags:
       - users
@@ -252,7 +252,9 @@ paths:
           $ref: "#/components/responses/InternalServerError"
       security:
         - bearerAuth: []
-  /users/self/stream:
+  /users/{user_id}/stream:
+    parameters:
+    - $ref: "#/components/parameters/UserId"
     get:
       tags:
       - users
@@ -260,6 +262,7 @@ paths:
       description: |-
         The authenticated user will be presented with his stream of photos in reverse chronological order, with information about when it was uploaded (date and time) and how many likes and comments it has.
         The stream is composed by photos from other users that this user follows.
+        The user_id in the path must match the user ID of the authenticated user.
       operationId: getMyStream
       responses:
         "200":
@@ -351,7 +354,7 @@ paths:
               type: string
               format: binary
               minLength: 0
-              maxLength: 100000
+              maxLength: 1000000 # approximately 1 MB
       responses:
         "201":
           description: Photo uploaded successfully.
@@ -364,7 +367,7 @@ paths:
         "401":
           $ref: "#/components/responses/UnauthorizedError"
         "403":
-          description: User cannot puublish photos on behalf of another user.
+          description: User cannot publish photos on behalf of another user.
         "413": # Request Entity Too Large
           description: The photo is too large in size.
         "500": 
@@ -574,14 +577,6 @@ components:
           description: Unique user identifier.
           type: string
           example: "abc012345"
-    CommentId:
-      type: object
-      description: The comment ID
-      properties:
-        id:
-          description: Unique comment identifier.
-          type: string
-          example: "123cobal"
     CommentDetails:
       description: Defines the information about a comment, namely its identifier, creation date and time, user author and text content.
       type: object
@@ -594,7 +589,7 @@ components:
           type: string
           format: date-time
           description: Comment creation date and time
-          example: "2022-05-31T08:30:00Z"
+          example: "2022-05-31 08:30:00"
         user_author:
           $ref: "#/components/schemas/UserShortInfo"
         text:
@@ -614,7 +609,7 @@ components:
           items:
             $ref: "#/components/schemas/CommentDetails"
           minItems: 0
-          maxItems: 10
+          maxItems: 50
     LikesCollection:
       description: Defines a collection of likes for a given photo, including the total number of likes and the list of short-version user profiles who liked the photo.
       type: object
@@ -629,7 +624,7 @@ components:
           items:
             $ref: "#/components/schemas/UserShortInfo"
           minItems: 0
-          maxItems: 10
+          maxItems: 50
     PhotoDetails:
       description: Defines the information regarding a photo, namely its identifier, creation date and time, url, user owner, collection of likes and comments.
       type: object
@@ -642,7 +637,7 @@ components:
           type: string
           format: date-time
           description: Photo creation date and time
-          example: "2021-01-30T08:30:00Z"
+          example: "2021-01-30 08:30:00"
         photo_url:
           description: URL of the photo resource
           type: string
@@ -662,7 +657,7 @@ components:
           items:
             $ref: "#/components/schemas/PhotoDetails"
           minItems: 0
-          maxItems: 10
+          maxItems: 50
     UserMetrics:
       description: Defines the public metrics of a user, namely the followers, following and uploaded photos number.
       type: object
@@ -725,7 +720,7 @@ components:
           items:
             $ref: "#/components/schemas/UserShortInfo"
           minItems: 0
-          maxItems: 10
+          maxItems: 50
   securitySchemes:
     bearerAuth:
       type: http

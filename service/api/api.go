@@ -38,7 +38,7 @@ package api
 
 import (
 	"errors"
-	"git.sapienzaapps.it/fantasticcoffee/fantastic-coffee-decaffeinated/service/database"
+	"wasa-photo.uniroma1.it/wasa-photo/service/database"
 	"github.com/julienschmidt/httprouter"
 	"github.com/sirupsen/logrus"
 	"net/http"
