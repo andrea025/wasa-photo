@@ -1,14 +1,14 @@
 package api
 
 import (
+	"encoding/json"
+	"errors"
+	"net/http"
+
 	"github.com/julienschmidt/httprouter"
 	"wasa-photo.uniroma1.it/wasa-photo/service/api/reqcontext"
 	"wasa-photo.uniroma1.it/wasa-photo/service/database"
-	"net/http"
-	"encoding/json"
-	"errors"
 )
-
 
 func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	var username Username
@@ -22,7 +22,7 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 		return
 	}
 
-	err = rt.db.SetMyUsername(ps.ByName("user_id"), username.Name);
+	err = rt.db.SetMyUsername(ps.ByName("user_id"), username.Name)
 	if errors.Is(err, database.ErrUsernameAlreadyTaken) {
 		w.WriteHeader(http.StatusConflict)
 		return

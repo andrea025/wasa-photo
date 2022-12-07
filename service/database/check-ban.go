@@ -12,7 +12,7 @@ func (db *appdbimpl) CheckBan(user_id string, target_user_id string) (bool, erro
 		return false, nil
 	} else if err != nil {
 		// considering just the error, false will be ignored
-		return false, err 
+		return false, err
 	}
 	return true, nil
 }

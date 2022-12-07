@@ -2,9 +2,9 @@ package database
 
 import (
 	"crypto/md5"
-	"fmt"
-	"errors"
 	"database/sql"
+	"errors"
+	"fmt"
 )
 
 func (db *appdbimpl) DoLogin(username string) (string, error) {
@@ -14,12 +14,12 @@ func (db *appdbimpl) DoLogin(username string) (string, error) {
 	if errors.Is(err, sql.ErrNoRows) {
 		// if there is no user in the User table with the given username
 		// generate a new user id
-		id = fmt.Sprintf("%x", md5.Sum([]byte(username)));
+		id = fmt.Sprintf("%x", md5.Sum([]byte(username)))
 
 		sqlStmt := `INSERT INTO User (id, username) VALUES (?, ?)`
-		_, e := db.c.Exec(sqlStmt, id, username)
-		if e != nil {
-			return "", e
+		_, err = db.c.Exec(sqlStmt, id, username)
+		if err != nil {
+			return "", err
 		}
 	} else if err != nil {
 		return "", err

@@ -1,16 +1,16 @@
 package database
 
 type Photo struct {
-	Id string
+	Id              string
 	CreatedDatetime string
-	PhotoUrl string
-	Owner UserShortInfo
-	Likes LikesCollection
-	Comments CommentsCollection
+	PhotoUrl        string
+	Owner           UserShortInfo
+	Likes           LikesCollection
+	Comments        CommentsCollection
 }
 
 type UserShortInfo struct {
-	Id string
+	Id       string
 	Username string
 }
 
@@ -20,10 +20,9 @@ type LikesCollection struct {
 }
 
 type CommentsCollection struct {
-	Count int
+	Count    int
 	Comments []Comment
 }
-
 
 func (db *appdbimpl) UploadPhoto(id string, created_at string, url string, owner string) (Photo, error) {
 	var photo Photo
@@ -35,6 +34,6 @@ func (db *appdbimpl) UploadPhoto(id string, created_at string, url string, owner
 	photo.Id, photo.CreatedDatetime, photo.PhotoUrl, photo.Owner, photo.Likes, photo.Comments = id, created_at, url, user, LikesCollection{Count: 0, Users: []UserShortInfo{}}, CommentsCollection{Count: 0, Comments: []Comment{}}
 
 	sqlStmt := `INSERT INTO Photo (id, created_at, url, owner) VALUES (?, ?, ?, ?)`
-	_, e := db.c.Exec(sqlStmt, id, created_at, url, owner)
-	return photo, e
+	_, err = db.c.Exec(sqlStmt, id, created_at, url, owner)
+	return photo, err
 }

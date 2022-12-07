@@ -1,11 +1,12 @@
 package api
 
 import (
+	"errors"
+	"net/http"
+
 	"github.com/julienschmidt/httprouter"
 	"wasa-photo.uniroma1.it/wasa-photo/service/api/reqcontext"
 	"wasa-photo.uniroma1.it/wasa-photo/service/database"
-	"net/http"
-	"errors"
 )
 
 func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {

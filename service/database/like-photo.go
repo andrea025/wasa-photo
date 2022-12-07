@@ -16,9 +16,10 @@ func (db *appdbimpl) LikePhoto(photo_id string, user_id string) error {
 		return ErrNotSelfLike
 	}
 
-	banned, e := db.CheckBan(owner_id, user_id)
-	if e != nil {
-		return e
+	var banned bool
+	banned, err = db.CheckBan(owner_id, user_id)
+	if err != nil {
+		return err
 	} else if banned {
 		return ErrBanned
 	}

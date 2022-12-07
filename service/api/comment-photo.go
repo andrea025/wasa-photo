@@ -1,25 +1,25 @@
 package api
 
 import (
+	"crypto/md5"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"net/http"
+	"strings"
+	"time"
+
 	"github.com/julienschmidt/httprouter"
 	"wasa-photo.uniroma1.it/wasa-photo/service/api/reqcontext"
 	"wasa-photo.uniroma1.it/wasa-photo/service/database"
-	"net/http"
-	"fmt"
-	"crypto/md5"
-	"strings"
-	"errors"
-	"encoding/json"
-	"time"
 )
 
-
 type Comment struct {
-	Id string	`json:"id"`
-	Photo string 	`json:"photo"`
-	User string	`json:"user"`
-	CreatedDatetime string	`json:"created_at"`
-	Text string	`json:"text"`
+	Id              string `json:"id"`
+	Photo           string `json:"photo"`
+	User            string `json:"user"`
+	CreatedDatetime string `json:"created_at"`
+	Text            string `json:"text"`
 }
 
 func (c *Comment) FromDatabase(comment database.Comment) {
@@ -32,11 +32,11 @@ func (c *Comment) FromDatabase(comment database.Comment) {
 
 func (c *Comment) ToDatabase() database.Comment {
 	return database.Comment{
-		Id: c.Id,
-		Photo: c.Photo,
-		User: c.User,
+		Id:              c.Id,
+		Photo:           c.Photo,
+		User:            c.User,
 		CreatedDatetime: c.CreatedDatetime,
-		Text: c.Text,
+		Text:            c.Text,
 	}
 }
 
@@ -46,8 +46,7 @@ type CommentText struct {
 
 func (ct *CommentText) isNotValid() bool {
 	return len(ct.Text) < 3 || len(ct.Text) > 300
-} 
-
+}
 
 func (rt *_router) commentPhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	var ct CommentText
@@ -65,20 +64,20 @@ func (rt *_router) commentPhoto(w http.ResponseWriter, r *http.Request, ps httpr
 	pid := ps.ByName("photo_id")
 	uid := strings.Split(r.Header.Get("Authorization"), "Bearer ")[1]
 	creation := (time.Now()).Format(time.RFC3339)
-	creation_datetime := creation[0:10] + " " + creation[11:19]		// correct format
-	cid := fmt.Sprintf("%x", md5.Sum([]byte(pid + uid + creation)))
+	creation_datetime := creation[0:10] + " " + creation[11:19] // correct format
+	cid := fmt.Sprintf("%x", md5.Sum([]byte(pid+uid+creation)))
 	comment = Comment{Id: cid, Photo: pid, User: uid, Text: ct.Text, CreatedDatetime: creation_datetime}
 
-	dbComment, err := rt.db.CommentPhoto(comment.ToDatabase());
-	if errors.Is(err, database.ErrBanned) {
+	dbComment, er := rt.db.CommentPhoto(comment.ToDatabase())
+	if errors.Is(er, database.ErrBanned) {
 		w.WriteHeader(http.StatusForbidden)
 		return
-	} else if errors.Is(err, database.ErrPhotoDoesNotExist) {
+	} else if errors.Is(er, database.ErrPhotoDoesNotExist) {
 		w.WriteHeader(http.StatusNotFound)
 		return
-	} else if err != nil {
+	} else if er != nil {
 		// some internal problem with the database
-		ctx.Logger.WithError(err).Error("can't create comment")
+		ctx.Logger.WithError(er).Error("can't create comment")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

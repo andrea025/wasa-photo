@@ -1,10 +1,11 @@
 package api
 
 import (
+	"encoding/json"
+	"net/http"
+
 	"github.com/julienschmidt/httprouter"
 	"wasa-photo.uniroma1.it/wasa-photo/service/api/reqcontext"
-	"net/http"
-	"encoding/json"
 )
 
 type Username struct {
@@ -13,18 +14,17 @@ type Username struct {
 
 func (u *Username) isNotValid() bool {
 	return len(u.Name) < 3 || len(u.Name) > 16
-} 
+}
 
 type UserId struct {
 	Id string `json:"id"`
 }
 
-
 func (rt *_router) doLogin(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	// query the User table to get a single row (id) where the username is equal to the one present in the body
 	// if the query has that element, put it into the body in JSON format and return it
 	// otherwise generate an id and perform an insert of the new user on the User table, and return the id like in the previous step
-	
+
 	var username Username
 	err := json.NewDecoder(r.Body).Decode(&username)
 	if err != nil {
@@ -36,7 +36,8 @@ func (rt *_router) doLogin(w http.ResponseWriter, r *http.Request, ps httprouter
 		return
 	}
 
-	id, err := rt.db.DoLogin(username.Name);
+	var id string
+	id, err = rt.db.DoLogin(username.Name)
 	if err != nil {
 		// some internal problem with the database
 		w.WriteHeader(http.StatusInternalServerError)

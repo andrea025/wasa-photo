@@ -1,31 +1,31 @@
 package api
 
 import (
+	"crypto/md5"
+	"crypto/rand"
+	"encoding/json"
+	"fmt"
+	"io"
+	"math/big"
+	"net/http"
+	"os"
+	"strings"
+	"time"
+
 	"github.com/julienschmidt/httprouter"
 	"wasa-photo.uniroma1.it/wasa-photo/service/api/reqcontext"
 	"wasa-photo.uniroma1.it/wasa-photo/service/database"
-	"net/http"
-	"fmt"
-	"crypto/rand"
-	"crypto/md5"
-	"math/big"
-	"strings"
-	"os"
-	"io/ioutil"
-	"encoding/json"
-	"time"
 )
 
 var storageBasepath string = "./storage/"
 
-
 type Photo struct {
-	Id string `json:"id"`
-	CreatedDatetime string `json:"created_datetime"`
-	PhotoUrl string `json:"photo_url"`
-	Owner UserShortInfo `json:"owner"`
-	Likes LikesCollection `json:"likes"`
-	Comments CommentsCollection `json:"comments"`
+	Id              string             `json:"id"`
+	CreatedDatetime string             `json:"created_datetime"`
+	PhotoUrl        string             `json:"photo_url"`
+	Owner           UserShortInfo      `json:"owner"`
+	Likes           LikesCollection    `json:"likes"`
+	Comments        CommentsCollection `json:"comments"`
 }
 
 func (p *Photo) FromDatabase(photo database.Photo) {
@@ -37,9 +37,8 @@ func (p *Photo) FromDatabase(photo database.Photo) {
 	p.Comments.FromDatabase(photo.Comments)
 }
 
-
 type UserShortInfo struct {
-	Id string `json:"id"`
+	Id       string `json:"id"`
 	Username string `json:"username"`
 }
 
@@ -48,9 +47,8 @@ func (usi *UserShortInfo) FromDatabase(userShortInfo database.UserShortInfo) {
 	usi.Username = userShortInfo.Username
 }
 
-
 type LikesCollection struct {
-	Count int `json:"count"`
+	Count int             `json:"count"`
 	Users []UserShortInfo `json:"users"`
 }
 
@@ -64,10 +62,9 @@ func (lc *LikesCollection) FromDatabase(lcdb database.LikesCollection) {
 	}
 }
 
-
 type CommentsCollection struct {
-	Count int	`json:"count"`
-	Comments []Comment	`json:"comments"`
+	Count    int       `json:"count"`
+	Comments []Comment `json:"comments"`
 }
 
 func (cc *CommentsCollection) FromDatabase(ccdb database.CommentsCollection) {
@@ -80,11 +77,9 @@ func (cc *CommentsCollection) FromDatabase(ccdb database.CommentsCollection) {
 	}
 }
 
-
-
 func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	// make sure the binary file in the body request is an image (actually it is not a proper check for its validity, since the client is taking the image/png from the extension of the file being uploaded, but fair enough)
-	ctype := strings.Split(r.Header.Get("Content-type"), ";")[0];
+	ctype := strings.Split(r.Header.Get("Content-type"), ";")[0]
 	if ctype == "" || !(ctype == "image/png" || ctype == "image/jpeg") {
 		// the request has no Content-type header, therefore is not valid
 		// rt.baseLogger.Warning("uploadPhoto: a request has been sent without Content-type header or with Content-type header different than image/png and image/jpeg, the binary string sent in the request body is not valid")
@@ -104,7 +99,7 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	}
 
 	// reading the image
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("can't read the binary string in the body of the request")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -112,13 +107,13 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	}
 
 	// generating  the photo id
-	rdm, err := rand.Int(rand.Reader, big.NewInt(1000))
-	if err != nil {
+	rdm, er := rand.Int(rand.Reader, big.NewInt(1000))
+	if er != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	// Concatenating the user id with the base 2 representation of the random number generatend, and md5 hashing the result to get the photo id
-	pid := fmt.Sprintf("%x", md5.Sum([]byte(strings.Split(r.Header.Get("Authorization"), "Bearer ")[1] + rdm.Text(2))));
+	pid := fmt.Sprintf("%x", md5.Sum([]byte(strings.Split(r.Header.Get("Authorization"), "Bearer ")[1]+rdm.Text(2))))
 	filename := pid + "." + strings.Split(ctype, "/")[1]
 
 	file, e := os.Create(storageBasepath + filename)
@@ -130,17 +125,21 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	defer file.Close()
 
 	_, err = file.Write(body)
-
+	if err != nil {
+		ctx.Logger.WithError(err).Error("can't write the photo on the file")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 	// insert the new record into a table
 	var photo Photo
 	creation := (time.Now()).Format(time.RFC3339)
-	creation_datetime := creation[0:10] + " " + creation[11:19]		// correct format
+	creation_datetime := creation[0:10] + " " + creation[11:19] // correct format
 	url := "storage/" + filename
 
-	dbphoto, e := rt.db.UploadPhoto(pid, creation_datetime, url, strings.Split(r.Header.Get("Authorization"), "Bearer ")[1])
-	if e != nil {
-		ctx.Logger.WithError(e).Error("can't upload photo")
+	dbphoto, erro := rt.db.UploadPhoto(pid, creation_datetime, url, strings.Split(r.Header.Get("Authorization"), "Bearer ")[1])
+	if erro != nil {
+		ctx.Logger.WithError(erro).Error("can't upload photo")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

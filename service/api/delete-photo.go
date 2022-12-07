@@ -1,13 +1,14 @@
 package api
 
 import (
+	"errors"
+	"net/http"
+	"os"
+	"strings"
+
 	"github.com/julienschmidt/httprouter"
 	"wasa-photo.uniroma1.it/wasa-photo/service/api/reqcontext"
 	"wasa-photo.uniroma1.it/wasa-photo/service/database"
-	"net/http"
-	"strings"
-	"os"
-	"errors"
 )
 
 func (rt *_router) deletePhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
@@ -28,7 +29,7 @@ func (rt *_router) deletePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	}
 
 	url_parts := strings.Split(url, "/")
-	path := storageBasepath + url_parts[len(url_parts) - 1]
+	path := storageBasepath + url_parts[len(url_parts)-1]
 	err = os.Remove(path)
 	if err != nil {
 		ctx.Logger.WithError(err).WithField("id", pid).Error("can't delete the photo form the filesystem")

@@ -1,21 +1,21 @@
 package api
 
 import (
+	"encoding/json"
+	"errors"
+	"net/http"
+	"strings"
+
 	"github.com/julienschmidt/httprouter"
 	"wasa-photo.uniroma1.it/wasa-photo/service/api/reqcontext"
 	"wasa-photo.uniroma1.it/wasa-photo/service/database"
-	"net/http"
-	"strings"
-	"errors"
-	"encoding/json"
 )
-
 
 func (rt *_router) getPhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	user_id := ps.ByName("photo_id")
 
 	var photo Photo
-	dbphoto, err := rt.db.GetPhoto(user_id, strings.Split(r.Header.Get("Authorization"), "Bearer ")[1]) 
+	dbphoto, err := rt.db.GetPhoto(user_id, strings.Split(r.Header.Get("Authorization"), "Bearer ")[1])
 	if errors.Is(err, database.ErrPhotoDoesNotExist) {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -30,7 +30,7 @@ func (rt *_router) getPhoto(w http.ResponseWriter, r *http.Request, ps httproute
 	}
 
 	photo.FromDatabase(dbphoto)
-	
+
 	w.Header().Set("content-type", "application/json")
 	err = json.NewEncoder(w).Encode(photo)
 	if err != nil {

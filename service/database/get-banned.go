@@ -1,6 +1,5 @@
 package database
 
-
 func (db *appdbimpl) GetBanned(id string) ([]UserShortInfo, error) {
 	users := []UserShortInfo{}
 
@@ -12,9 +11,9 @@ func (db *appdbimpl) GetBanned(id string) ([]UserShortInfo, error) {
 	}
 
 	sqlStmt := `SELECT user_followed, username FROM User, Banned WHERE user_banning == ? AND user_followed == id LIMIT 50;`
-	rows, err := db.c.Query(sqlStmt, id)
-	if err != nil {
-		return []UserShortInfo{}, err
+	rows, er := db.c.Query(sqlStmt, id)
+	if er != nil {
+		return []UserShortInfo{}, er
 	}
 	defer func() { _ = rows.Close() }()
 
@@ -24,12 +23,12 @@ func (db *appdbimpl) GetBanned(id string) ([]UserShortInfo, error) {
 		if err != nil {
 			return []UserShortInfo{}, err
 		}
-		
+
 		users = append(users, user)
 	}
 	if err = rows.Err(); err != nil {
 		return []UserShortInfo{}, err
-	} 
+	}
 
 	return users, nil
 }

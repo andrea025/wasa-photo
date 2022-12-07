@@ -1,18 +1,17 @@
 package api
 
 import (
-	"github.com/julienschmidt/httprouter"
-	"wasa-photo.uniroma1.it/wasa-photo/service/api/reqcontext"
+	"encoding/json"
 	"net/http"
 	"strings"
-	"encoding/json"
-	"fmt"
+
+	"github.com/julienschmidt/httprouter"
+	"wasa-photo.uniroma1.it/wasa-photo/service/api/reqcontext"
 )
 
 type PhotoListResponse struct {
 	Data []Photo `json:"data"`
 }
-
 
 func (rt *_router) getMyStream(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	stream := []Photo{}
@@ -20,7 +19,6 @@ func (rt *_router) getMyStream(w http.ResponseWriter, r *http.Request, ps httpro
 
 	dbstream, err := rt.db.GetMyStream(uid)
 	if err != nil {
-		fmt.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

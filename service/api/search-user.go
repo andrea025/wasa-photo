@@ -1,18 +1,18 @@
 package api
 
 import (
+	"encoding/json"
+	"errors"
+	"net/http"
+
 	"github.com/julienschmidt/httprouter"
 	"wasa-photo.uniroma1.it/wasa-photo/service/api/reqcontext"
 	"wasa-photo.uniroma1.it/wasa-photo/service/database"
-	"net/http"
-	"errors"
-	"encoding/json"
 )
 
 type UsersInfoListResponse struct {
 	Data []UserShortInfo `json:"data"`
 }
-
 
 func (rt *_router) searchUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	ret := []UserShortInfo{}
@@ -58,7 +58,7 @@ func (rt *_router) searchUser(w http.ResponseWriter, r *http.Request, ps httprou
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	err := json.NewEncoder(w).Encode(UsersInfoListResponse{Data:ret})
+	err := json.NewEncoder(w).Encode(UsersInfoListResponse{Data: ret})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}

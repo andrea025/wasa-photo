@@ -1,6 +1,5 @@
 package database
 
-
 func (db *appdbimpl) GetMyStream(id string) ([]Photo, error) {
 	stream := []Photo{}
 
@@ -27,7 +26,7 @@ func (db *appdbimpl) GetMyStream(id string) ([]Photo, error) {
 	}
 	if err = rows.Err(); err != nil {
 		return []Photo{}, err
-	} 
+	}
 
 	return stream, nil
 }

@@ -57,14 +57,14 @@ type Fountain struct {
 // AppDatabase is the high level interface for the DB
 type AppDatabase interface {
 	DoLogin(username string) (string, error)
-	GetUserProfile(id string, req_id string) (User, error) 
+	GetUserProfile(id string, req_id string) (User, error)
 	CheckBan(user_id string, target_user_id string) (bool, error) // don't know if leave it here or not
 	CheckUser(user_id string) (bool, error)
 	CheckPhoto(photo_id string) (bool, error)
-	FollowUser(user_id string, target_user_id string) (error)
-	BanUser(user_id string, target_user_id string) (error)
-	UnfollowUser(user_id string, target_user_id string) (error)
-	UnbanUser(user_id string, target_user_id string) (error)
+	FollowUser(user_id string, target_user_id string) error
+	BanUser(user_id string, target_user_id string) error
+	UnfollowUser(user_id string, target_user_id string) error
+	UnbanUser(user_id string, target_user_id string) error
 	UploadPhoto(id string, created_at string, url string, owner string) (Photo, error)
 	DeletePhoto(photo_id string, req_id string) (string, error)
 	LikePhoto(photo_id string, user_id string) error
@@ -75,7 +75,7 @@ type AppDatabase interface {
 	GetUsers() ([]UserShortInfo, error)
 	SearchUser(username string) (UserShortInfo, error)
 	GetPhoto(id string, req_id string) (Photo, error)
-	SetMyUsername(id string, username string) (error)
+	SetMyUsername(id string, username string) error
 	GetFollowing(id string) ([]UserShortInfo, error)
 	GetBanned(id string) ([]UserShortInfo, error)
 
@@ -157,7 +157,6 @@ func New(db *sql.DB) (AppDatabase, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error executing PRAGMA foreign_keys command: %w", err)
 	}
-
 
 	return &appdbimpl{
 		c: db,

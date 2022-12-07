@@ -1,10 +1,9 @@
 package database
 
 import (
-	"errors"
 	"database/sql"
+	"errors"
 )
-
 
 func (db *appdbimpl) SearchUser(username string) (UserShortInfo, error) {
 	var user UserShortInfo

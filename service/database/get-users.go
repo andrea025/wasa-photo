@@ -1,6 +1,5 @@
 package database
 
-
 func (db *appdbimpl) GetUsers() ([]UserShortInfo, error) {
 	users := []UserShortInfo{}
 
@@ -17,12 +16,12 @@ func (db *appdbimpl) GetUsers() ([]UserShortInfo, error) {
 		if err != nil {
 			return []UserShortInfo{}, err
 		}
-		
+
 		users = append(users, user)
 	}
 	if err = rows.Err(); err != nil {
 		return []UserShortInfo{}, err
-	} 
+	}
 
 	return users, nil
 }

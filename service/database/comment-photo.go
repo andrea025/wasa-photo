@@ -1,16 +1,16 @@
 package database
 
 import (
-	"errors"
 	"database/sql"
+	"errors"
 )
 
 type Comment struct {
-	Id string
-	Photo string
-	User string
+	Id              string
+	Photo           string
+	User            string
 	CreatedDatetime string
-	Text string
+	Text            string
 }
 
 func (db *appdbimpl) CommentPhoto(comment Comment) (Comment, error) {
@@ -22,14 +22,15 @@ func (db *appdbimpl) CommentPhoto(comment Comment) (Comment, error) {
 		return comment, err
 	}
 
-	banned, e := db.CheckBan(owner_id, comment.User)
-	if e != nil {
-		return comment, e
+	var banned bool
+	banned, err = db.CheckBan(owner_id, comment.User)
+	if err != nil {
+		return comment, err
 	} else if banned {
 		return comment, ErrBanned
 	}
 
 	sqlStmt := `INSERT INTO Comment (id, photo, user, text, created_at) VALUES (?, ?, ?, ?, ?)`
-	_, e = db.c.Exec(sqlStmt, comment.Id, comment.Photo, comment.User, comment.Text, comment.CreatedDatetime)
-	return comment, e
+	_, err = db.c.Exec(sqlStmt, comment.Id, comment.Photo, comment.User, comment.Text, comment.CreatedDatetime)
+	return comment, err
 }

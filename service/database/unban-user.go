@@ -1,7 +1,6 @@
 package database
 
-
-func (db *appdbimpl) UnbanUser(user_id string, target_user_id string) (error) {
+func (db *appdbimpl) UnbanUser(user_id string, target_user_id string) error {
 	exists, err := db.CheckUser(target_user_id)
 	if err != nil {
 		return err
@@ -10,6 +9,6 @@ func (db *appdbimpl) UnbanUser(user_id string, target_user_id string) (error) {
 	}
 
 	sqlStmt := `DELETE FROM Banned WHERE user_following == ? AND user_followed == ?`
-	_, e := db.c.Exec(sqlStmt, user_id, target_user_id)
-	return e
+	_, err = db.c.Exec(sqlStmt, user_id, target_user_id)
+	return err
 }

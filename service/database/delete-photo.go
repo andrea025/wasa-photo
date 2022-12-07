@@ -1,8 +1,8 @@
 package database
 
 import (
-	"errors"
 	"database/sql"
+	"errors"
 )
 
 func (db *appdbimpl) DeletePhoto(photo_id string, req_id string) (string, error) {
@@ -18,8 +18,7 @@ func (db *appdbimpl) DeletePhoto(photo_id string, req_id string) (string, error)
 		return "", ErrDeletePhotoForbidden
 	}
 
-
 	sqlStmt := `DELETE FROM Photo WHERE id == ?;`
-	_, e := db.c.Exec(sqlStmt, photo_id)
-	return url, e
+	_, err = db.c.Exec(sqlStmt, photo_id)
+	return url, err
 }

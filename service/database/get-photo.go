@@ -8,17 +8,18 @@ import (
 func (db *appdbimpl) GetPhoto(id string, req_id string) (Photo, error) {
 	var photo Photo
 	var owner_id string
-	
+
 	err := db.c.QueryRow("SELECT * FROM Photo WHERE id=?", id).Scan(&photo.Id, &photo.CreatedDatetime, &photo.PhotoUrl, &owner_id)
 	if errors.Is(err, sql.ErrNoRows) {
 		return photo, ErrPhotoDoesNotExist
 	}
 
 	// check if the requesting user has been banned
-	ban, e := db.CheckBan(owner_id, req_id)
-	if e != nil {
-		return photo, e
-	} else if ban {
+	var banned bool
+	banned, err = db.CheckBan(owner_id, req_id)
+	if err != nil {
+		return photo, err
+	} else if banned {
 		return photo, ErrBanned
 	}
 
@@ -53,7 +54,7 @@ func (db *appdbimpl) GetPhoto(id string, req_id string) (Photo, error) {
 	}
 	if er = rows.Err(); er != nil {
 		return photo, er
-	} 
+	}
 
 	photo.Comments = CommentsCollection{Count: 0, Comments: []Comment{}}
 	rows, er = db.c.Query("SELECT * FROM Comment WHERE photo=? LIMIT 50;", id)
@@ -72,7 +73,7 @@ func (db *appdbimpl) GetPhoto(id string, req_id string) (Photo, error) {
 		var banned bool
 		banned, er = db.CheckBan(comment.User, req_id)
 		if er != nil {
-			return photo, err
+			return photo, er
 		} else if !banned {
 			photo.Comments.Comments = append(photo.Comments.Comments, comment)
 		}
@@ -80,7 +81,7 @@ func (db *appdbimpl) GetPhoto(id string, req_id string) (Photo, error) {
 	}
 	if er = rows.Err(); er != nil {
 		return photo, er
-	} 
+	}
 
 	return photo, nil
 }
