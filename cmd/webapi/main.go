@@ -146,6 +146,14 @@ func run() error {
 		logger.Infof("stopping API server")
 	}()
 
+	// Create and start the file server listening for requests in a separate goroutine
+	go func() {
+		logger.Infof("File Server listening on %s", cfg.File.FileHost)
+		http.Handle("/", http.FileServer(http.Dir(cfg.File.Directory)))
+		serverErrors <- http.ListenAndServe(cfg.File.FileHost, nil)
+		logger.Infof("stopping file server")
+	}()
+
 	// Waiting for shutdown signal or POSIX signals
 	select {
 	case err := <-serverErrors:

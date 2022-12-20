@@ -15,29 +15,19 @@ import (
 )
 
 type Comment struct {
-	Id              string `json:"id"`
-	Photo           string `json:"photo"`
-	User            string `json:"user"`
-	CreatedDatetime string `json:"created_at"`
-	Text            string `json:"text"`
+	Id              string        `json:"id"`
+	Photo           string        `json:"photo"`
+	User            UserShortInfo `json:"user"`
+	Text            string        `json:"text"`
+	CreatedDatetime string        `json:"created_datetime"`
 }
 
 func (c *Comment) FromDatabase(comment database.Comment) {
 	c.Id = comment.Id
 	c.Photo = comment.Photo
-	c.User = comment.User
-	c.CreatedDatetime = comment.CreatedDatetime
+	c.User.FromDatabase(comment.User)
 	c.Text = comment.Text
-}
-
-func (c *Comment) ToDatabase() database.Comment {
-	return database.Comment{
-		Id:              c.Id,
-		Photo:           c.Photo,
-		User:            c.User,
-		CreatedDatetime: c.CreatedDatetime,
-		Text:            c.Text,
-	}
+	c.CreatedDatetime = comment.CreatedDatetime
 }
 
 type CommentText struct {
@@ -64,11 +54,11 @@ func (rt *_router) commentPhoto(w http.ResponseWriter, r *http.Request, ps httpr
 	pid := ps.ByName("photo_id")
 	uid := strings.Split(r.Header.Get("Authorization"), "Bearer ")[1]
 	creation := (time.Now()).Format(time.RFC3339)
-	creation_datetime := creation[0:10] + " " + creation[11:19] // correct format
+	created_datetime := creation[0:10] + " " + creation[11:19] // correct format
 	cid := fmt.Sprintf("%x", md5.Sum([]byte(pid+uid+creation)))
-	comment = Comment{Id: cid, Photo: pid, User: uid, Text: ct.Text, CreatedDatetime: creation_datetime}
+	// comment = Comment{Id: cid, Photo: pid, User: uid, Text: ct.Text, CreatedDatetime: creation_datetime}
 
-	dbComment, er := rt.db.CommentPhoto(comment.ToDatabase())
+	dbComment, er := rt.db.CommentPhoto(cid, pid, uid, ct.Text, created_datetime)
 	if errors.Is(er, database.ErrBanned) {
 		w.WriteHeader(http.StatusForbidden)
 		return

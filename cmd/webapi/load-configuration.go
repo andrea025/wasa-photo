@@ -24,9 +24,13 @@ type WebAPIConfiguration struct {
 		WriteTimeout    time.Duration `conf:"default:5s"`
 		ShutdownTimeout time.Duration `conf:"default:5s"`
 	}
+	File struct {
+		FileHost  string `conf:"default:0.0.0.0:3001"`
+		Directory string `conf:"default:./storage"`
+	}
 	Debug bool
 	DB    struct {
-		Filename string `conf:"default:/tmp/wasa-photo.db"`
+		Filename string `conf:"default:/tmp/wasa-photo.db?_foreign_keys=true"`
 	}
 }
 

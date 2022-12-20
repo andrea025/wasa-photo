@@ -12,11 +12,12 @@ import (
 )
 
 type User struct {
-	Id             string `json:"id"`
-	Username       string `json:"username"`
-	Followers      int    `json:"followers"`
-	Following      int    `json:"following"`
-	UploadedPhotos int    `json:"uploaded_photos"`
+	Id             string  `json:"id"`
+	Username       string  `json:"username"`
+	Followers      int     `json:"followers"`
+	Following      int     `json:"following"`
+	UploadedPhotos int     `json:"uploaded_photos"`
+	Photos         []Photo `json:"photos"`
 }
 
 func (u *User) FromDatabase(user database.User) {
@@ -25,16 +26,11 @@ func (u *User) FromDatabase(user database.User) {
 	u.Followers = user.Followers
 	u.Following = user.Following
 	u.UploadedPhotos = user.UploadedPhotos
-}
-
-// ToDatabase returns the fountain in a database-compatible representation
-func (u *User) ToDatabase() database.User {
-	return database.User{
-		Id:             u.Id,
-		Username:       u.Username,
-		Followers:      u.Followers,
-		Following:      u.Following,
-		UploadedPhotos: u.UploadedPhotos,
+	u.Photos = []Photo{}
+	for _, p := range user.Photos {
+		var photo Photo
+		photo.FromDatabase(p)
+		u.Photos = append(u.Photos, photo)
 	}
 }
 

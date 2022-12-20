@@ -29,7 +29,7 @@ func (rt *_router) deletePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	}
 
 	url_parts := strings.Split(url, "/")
-	path := storageBasepath + url_parts[len(url_parts)-1]
+	path := storageBasePath + url_parts[len(url_parts)-1]
 	err = os.Remove(path)
 	if err != nil {
 		ctx.Logger.WithError(err).WithField("id", pid).Error("can't delete the photo form the filesystem")

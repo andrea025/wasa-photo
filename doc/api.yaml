@@ -374,6 +374,33 @@ paths:
           $ref: "#/components/responses/InternalServerError"
       security:
         - bearerAuth: []
+  /users/{user_id}/followers:
+    parameters:
+    - $ref: "#/components/parameters/UserId"
+    get:
+      tags:
+      - relationships
+      summary: Get the list of users that follow this user
+      description: |-
+        Get the list of users that follow the user with the specified user_id.
+      operationId: getFollowers
+      responses:
+        "200":
+          description: List of users that follow this user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsersInfoListResponse"
+        "400":  
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "404":
+          description: User ID not found
+        "500": 
+          $ref: "#/components/responses/InternalServerError"
+      security:
+        - bearerAuth: []
   /users/{user_id}/following:
     parameters:
     - $ref: "#/components/parameters/UserId"

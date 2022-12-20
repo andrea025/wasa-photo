@@ -17,7 +17,8 @@ import (
 	"wasa-photo.uniroma1.it/wasa-photo/service/database"
 )
 
-var storageBasepath string = "./storage/"
+var fileServerBasePath string = "http://0.0.0.0:3001/"
+var storageBasePath string = "./storage/"
 
 type Photo struct {
 	Id              string             `json:"id"`
@@ -116,7 +117,7 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	pid := fmt.Sprintf("%x", md5.Sum([]byte(strings.Split(r.Header.Get("Authorization"), "Bearer ")[1]+rdm.Text(2))))
 	filename := pid + "." + strings.Split(ctype, "/")[1]
 
-	file, e := os.Create(storageBasepath + filename)
+	file, e := os.Create(storageBasePath + filename)
 	if e != nil {
 		ctx.Logger.WithError(e).Error("can't create the file for the photo")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -135,7 +136,7 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	var photo Photo
 	creation := (time.Now()).Format(time.RFC3339)
 	creation_datetime := creation[0:10] + " " + creation[11:19] // correct format
-	url := "storage/" + filename
+	url := fileServerBasePath + filename
 
 	dbphoto, erro := rt.db.UploadPhoto(pid, creation_datetime, url, strings.Split(r.Header.Get("Authorization"), "Bearer ")[1])
 	if erro != nil {

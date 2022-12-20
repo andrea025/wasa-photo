@@ -69,15 +69,16 @@ type AppDatabase interface {
 	DeletePhoto(photo_id string, req_id string) (string, error)
 	LikePhoto(photo_id string, user_id string) error
 	UnlikePhoto(photo_id string, user_id string) error
-	CommentPhoto(comment Comment) (Comment, error)
+	CommentPhoto(cid string, pid string, uid string, text string, created_datetime string) (Comment, error)
 	UncommentPhoto(photo_id string, comment_id string, req_id string) error
 	GetMyStream(id string) ([]Photo, error)
-	GetUsers() ([]UserShortInfo, error)
-	SearchUser(username string) (UserShortInfo, error)
+	GetUsers(req_id string) ([]UserShortInfo, error)
+	SearchUser(username string, req_id string) (UserShortInfo, error)
 	GetPhoto(id string, req_id string) (Photo, error)
 	SetMyUsername(id string, username string) error
-	GetFollowing(id string) ([]UserShortInfo, error)
-	GetBanned(id string) ([]UserShortInfo, error)
+	GetFollowers(id string, req_id string) ([]UserShortInfo, error)
+	GetFollowing(id string, req_id string) ([]UserShortInfo, error)
+	GetBanned(id string, req_id string) ([]UserShortInfo, error)
 
 	// Ping checks whether the database is available or not (in that case, an error will be returned)
 	Ping() error
@@ -149,13 +150,6 @@ func New(db *sql.DB) (AppDatabase, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error creating database structure when creating Banned table: %w", err)
 		}
-	}
-
-	// Pragma foreign key to enforce foreign key constraints (because we are using SQLite version 3.x)
-	sqlStmt := `PRAGMA foreign_keys = ON;`
-	_, err = db.Exec(sqlStmt)
-	if err != nil {
-		return nil, fmt.Errorf("error executing PRAGMA foreign_keys command: %w", err)
 	}
 
 	return &appdbimpl{

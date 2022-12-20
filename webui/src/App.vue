@@ -1,67 +1,105 @@
-<script setup>
-import { RouterLink, RouterView } from 'vue-router'
-</script>
 <script>
-export default {}
+import Header from './components/Header.vue'
+
+export default {
+  name: 'App',
+  components: { Header }
+}
 </script>
+
 
 <template>
-
-	<header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
-		<a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6" href="#/">Example App</a>
-		<button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
-			<span class="navbar-toggler-icon"></span>
-		</button>
-	</header>
-
-	<div class="container-fluid">
-		<div class="row">
-			<nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
-				<div class="position-sticky pt-3 sidebar-sticky">
-					<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
-						<span>General</span>
-					</h6>
-					<ul class="nav flex-column">
-						<li class="nav-item">
-							<RouterLink to="/" class="nav-link">
-								<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#home"/></svg>
-								Home
-							</RouterLink>
-						</li>
-						<li class="nav-item">
-							<RouterLink to="/link1" class="nav-link">
-								<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#layout"/></svg>
-								Menu item 1
-							</RouterLink>
-						</li>
-						<li class="nav-item">
-							<RouterLink to="/link2" class="nav-link">
-								<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#key"/></svg>
-								Menu item 2
-							</RouterLink>
-						</li>
-					</ul>
-
-					<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
-						<span>Secondary menu</span>
-					</h6>
-					<ul class="nav flex-column">
-						<li class="nav-item">
-							<RouterLink :to="'/some/' + 'variable_here' + '/path'" class="nav-link">
-								<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#file-text"/></svg>
-								Item 1
-							</RouterLink>
-						</li>
-					</ul>
-				</div>
-			</nav>
-
-			<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-				<RouterView />
-			</main>
-		</div>
-	</div>
+<div class="app-ctn">
+	<Header :key="this.$route.fullPath" />
+	<RouterView class="mt-60" :key="this.$route.fullPath" />
+</div>
 </template>
 
+
 <style>
+* {
+  font-family: 'Segoe UI', 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+:root {
+  --border-color: rgba(219,219,219,1);
+  --grey-text: #aaaaaa;
+  --blue-text: #0095F6;
+}
+.section {
+  display: flex;
+  justify-content: center;
+}
+.section.page {
+  margin: 28px 0;
+  margin-bottom: 0;
+}
+.section > .inner {
+  width: 935px;
+  position: relative;
+}
+button {
+  cursor: pointer;
+}
+.clear-btn {
+  text-decoration: none;
+  outline: none;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.875rem;
+  color: var(--grey-text);
+}
+.drop-modal {
+  box-shadow: 0 0 5px 3px rgb(0 0 0 / 10%);
+  margin-top: 8px;
+}
+.triangle-pointer {
+  content: '';
+  width: 20px;
+  height: 20px;
+  background: #FFFFFF;
+  box-shadow: 0 0 5px 3px rgb(0 0 0 / 10%);
+  transform: rotate(45deg);
+  position: absolute;
+  top: -5px;
+  right: 52px;
+  z-index: -1;
+}
+.tp-cover {
+  content: '';
+  width: 20px;
+  height: 20px;
+  background: #FFFFFF;
+  transform: rotate(45deg);
+  position: absolute;
+  top: -5px;
+  right: 52px;
+}
+.bg-layer {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+.fade {
+  opacity: 0.3;
+}
+.mt-60 {
+  padding-top: 60px;
+}
+.mt-0 {
+  margin-top: 0px;
+}
+.reveals {
+  animation: reveals .4s ease-in-out;
+  -webkit-animation: reveals .4s ease-in-out;
+}
+@keyframes reveals {
+  0% {opacity: 0;transform: scale(0.6);}
+  60% {opacity: 1;transform: scale(1);}
+  80% {opacity: 1;transform: scale(0.9);}
+  100% {opacity: 1;transform: scale(1);}
+}
 </style>

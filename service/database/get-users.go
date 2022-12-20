@@ -1,6 +1,6 @@
 package database
 
-func (db *appdbimpl) GetUsers() ([]UserShortInfo, error) {
+func (db *appdbimpl) GetUsers(req_id string) ([]UserShortInfo, error) {
 	users := []UserShortInfo{}
 
 	sqlStmt := `SELECT * FROM User LIMIT 50;`
@@ -17,7 +17,13 @@ func (db *appdbimpl) GetUsers() ([]UserShortInfo, error) {
 			return []UserShortInfo{}, err
 		}
 
-		users = append(users, user)
+		var banned bool
+		banned, err = db.CheckBan(user.Id, req_id)
+		if err != nil {
+			return []UserShortInfo{}, err
+		} else if !banned {
+			users = append(users, user)
+		}
 	}
 	if err = rows.Err(); err != nil {
 		return []UserShortInfo{}, err

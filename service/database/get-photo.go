@@ -23,8 +23,7 @@ func (db *appdbimpl) GetPhoto(id string, req_id string) (Photo, error) {
 		return photo, ErrBanned
 	}
 
-	var user_owner UserShortInfo
-	err = db.c.QueryRow("SELECT * FROM User WHERE id=?", owner_id).Scan(&user_owner.Id, &user_owner.Username)
+	err = db.c.QueryRow("SELECT * FROM User WHERE id=?", owner_id).Scan(&photo.Owner.Id, &photo.Owner.Username)
 	if errors.Is(err, sql.ErrNoRows) {
 		return photo, ErrPhotoDoesNotExist
 	}
@@ -65,13 +64,19 @@ func (db *appdbimpl) GetPhoto(id string, req_id string) (Photo, error) {
 
 	for rows.Next() {
 		var comment Comment
-		er = rows.Scan(&comment.Id, &comment.Photo, &comment.User, &comment.Text, &comment.CreatedDatetime)
+		var uid string
+		er = rows.Scan(&comment.Id, &comment.Photo, &uid, &comment.Text, &comment.CreatedDatetime)
+		if er != nil {
+			return photo, er
+		}
+
+		er = db.c.QueryRow("SELECT id, username FROM User WHERE id == ?;", uid).Scan(&comment.User.Id, &comment.User.Username)
 		if er != nil {
 			return photo, er
 		}
 
 		var banned bool
-		banned, er = db.CheckBan(comment.User, req_id)
+		banned, er = db.CheckBan(comment.User.Id, req_id)
 		if er != nil {
 			return photo, er
 		} else if !banned {

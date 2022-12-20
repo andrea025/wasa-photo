@@ -19,6 +19,7 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.PATCH("/users/:user_id", rt.auth(rt.wrap(rt.setMyUserName), true))
 	rt.router.GET("/users/:user_id/stream", rt.auth(rt.wrap(rt.getMyStream), false))
 	rt.router.POST("/users/:user_id/photos", rt.auth(rt.wrap(rt.uploadPhoto), true))
+	rt.router.GET("/users/:user_id/followers", rt.auth(rt.wrap(rt.getFollowers), false))
 	rt.router.GET("/users/:user_id/following", rt.auth(rt.wrap(rt.getFollowing), false))
 	rt.router.GET("/users/:user_id/banned", rt.auth(rt.wrap(rt.getBanned), true))
 	rt.router.PUT("/users/:user_id/following/:target_user_id", rt.auth(rt.wrap(rt.followUser), true))

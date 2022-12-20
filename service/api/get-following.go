@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/julienschmidt/httprouter"
 	"wasa-photo.uniroma1.it/wasa-photo/service/api/reqcontext"
@@ -13,9 +14,12 @@ import (
 func (rt *_router) getFollowing(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	ret := []UserShortInfo{}
 
-	dbfollowing, err := rt.db.GetFollowing(ps.ByName("user_id"))
+	dbfollowing, err := rt.db.GetFollowing(ps.ByName("user_id"), strings.Split(r.Header.Get("Authorization"), "Bearer ")[1])
 	if errors.Is(err, database.ErrUserDoesNotExist) {
 		w.WriteHeader(http.StatusNotFound)
+		return
+	} else if errors.Is(err, database.ErrBanned) {
+		w.WriteHeader(http.StatusForbidden)
 		return
 	} else if err != nil {
 		// In this case, we have an error on our side. Log the error (so we can be notified) and send a 500 to the user
