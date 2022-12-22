@@ -1,10 +1,10 @@
 <script>
 export default {
-  name: 'Loader',
+  name: 'LoadingSpinner',
   props: {
-	loading: Boolean,
-  }
-}
+    loading: Boolean,
+  },
+};
 </script>
 
 <template>

@@ -1,37 +1,37 @@
 <script>
 export default {
-  name: 'Search User',
+  name: 'SearchUserView',
   data: function() {
     return {
       errormsg: null,
       users: [],
-    }
+    };
   },
   methods: {
     async searchUser() {
       this.errormsg = null;
       try {
-        let username = this.$route.query.username;
-        if (username != "") {
-          let response = await this.$axios.get(this.$route.fullPath);
+        const username = this.$route.query.username;
+        if (username != '') {
+          const response = await this.$axios.get(this.$route.fullPath);
           this.users = response.data.data;
         } else {
-          let response = await this.$axios.get(this.$route.path);
+          const response = await this.$axios.get('/users');
           this.users = response.data.data;
         }
       } catch (e) {
-        switch(e.response.status) {
+        switch (e.response.status) {
           case 400:
-            this.errormsg = "Ops, there was something wrong with your request.";
+            this.errormsg = 'Ops, there was something wrong with your request.';
             break;
           case 401:
-            this.errormsg = "You need to login in order to perform this action.";
+            this.errormsg = 'You need to login in order to perform this action.';
             break;
           case 404:
-            this.errormsg = "User not found.";
+            this.errormsg = 'User not found.';
             break;
           case 500:
-            this.errormsg = "Ops, there was an internal problem with the server."
+            this.errormsg = 'Ops, there was an internal problem with the server.';
             break;
           default:
             this.errormsg = e.toString();
@@ -41,8 +41,8 @@ export default {
   },
   mounted() {
     this.searchUser();
-  }
-}
+  },
+};
 </script>
 
 
@@ -86,7 +86,7 @@ export default {
                     </div>
                     <div>
                       <div style="max-height: 358px; overflow-y: auto;">
-                        <div style="position: relative; display: flex; flex-direction: column; padding-bottom: 0px; padding-top: 0px;" v-for="user in this.users">
+                        <div style="position: relative; display: flex; flex-direction: column; padding-bottom: 0px; padding-top: 0px;" v-for="user in this.users" :key="user">
                           <div class="ctn-15">
                             <router-link :to="`/users/${user.id}`">
                               <span class="ctn-16">
@@ -108,8 +108,8 @@ export default {
   </div>
 </div>
 </template>
-  
-  
+
+
 <style>
 a {
   text-decoration: none;
@@ -145,13 +145,13 @@ a {
 .ctn-5 {
   display: flex;
   justify-content: center;
-} 
+}
 
 .ctn-6 {
   position: relative;
   width: 400px;
 }
-  
+
 .ctn-7 {
   background-color: rgb(var(--ig-elevated-background));
   border-top-left-radius: var(--modal-border-radius);
@@ -159,7 +159,7 @@ a {
   border-bottom-right-radius: var(--modal-border-radius);
   border-bottom-left-radius: var(--modal-border-radius);
 }
-  
+
 .ctn-8 {
   align-items: center;
   border-bottom: 1px solid rgb(var(--ig-elevated-separator));
@@ -173,8 +173,8 @@ a {
 .ctn-9 {
   display: flex;
   align-items: center;
-} 
-  
+}
+
 .ctn-10 {
   align-items: center;
   border: 0;
@@ -193,7 +193,7 @@ a {
   text-align: center;
   vertical-align: baseline;
 }
-  
+
 .ctn-11 {
   align-items: center;
   display: flex;
@@ -217,7 +217,7 @@ a {
   box-sizing: border-box;
   position: relative;
 }
-  
+
 .ctn-13 {
   align-items: center;
   background: transparent;
@@ -233,7 +233,7 @@ a {
   display: flex;
   justify-content: center;
 }
-  
+
 .ctn-15 {
   padding-left: calc(var(--base-unit) * 4);
   padding-right: calc(var(--base-unit) * 4);

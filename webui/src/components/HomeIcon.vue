@@ -4,10 +4,10 @@ export default {
   props: {
     active: {
       type: Boolean,
-      default: () => false
-    }
-  }
-}
+      default: () => false,
+    },
+  },
+};
 </script>
 
 

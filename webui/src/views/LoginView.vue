@@ -1,12 +1,12 @@
 <script>
 export default {
-  name: 'Login',
+  name: 'LoginView',
   data: function() {
     return {
       errormsg: null,
 	  loading: false,
-      username: "",
-      id: "",
+      username: '',
+      id: '',
     };
   },
   methods: {
@@ -14,15 +14,15 @@ export default {
       this.loading = true;
 	  this.errormsg = null;
 	  try {
-		let response = await this.$axios.post("/session", {username: this.username});
+        const response = await this.$axios.post('/session', {username: this.username});
 	    this.id = response.data.id;
 	  } catch (e) {
-	    switch(e.response.status) {
+	    switch (e.response.status) {
           case 400:
-            this.errormsg = "Ops, there was something wrong with your request: send a valid username.";
+            this.errormsg = 'Ops, there was something wrong with your request: send a valid username.';
             break;
           case 500:
-            this.errormsg = "Ops, there was an internal problem with the server."
+            this.errormsg = 'Ops, there was an internal problem with the server.';
             break;
           default:
             this.errormsg = e.toString();
@@ -33,17 +33,17 @@ export default {
 	  this.loading = false;
       localStorage.setItem('id', this.id);
       localStorage.setItem('username', this.username);
-      this.$router.replace("/home");
+      this.$router.replace('/home');
     },
     checkRedirect() {
       if (localStorage.getItem('id')) {
-        this.$router.replace("/home");
+        this.$router.replace('/home');
       }
-    }
+    },
   },
   mounted() {
     this.checkRedirect();
-  }
+  },
 };
 </script>
 

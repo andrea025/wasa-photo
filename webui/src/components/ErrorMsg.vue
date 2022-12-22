@@ -1,22 +1,22 @@
 <script>
 export default {
-	name: "Error Message",
-	props: ['msg']
-}
+  name: 'ErrorMessage',
+  props: ['msg'],
+};
 </script>
 
 
 <template>
-	<div class="alert alert-danger" role="alert">
-		<p>{{ msg }}</p>
-	</div>
+  <div class="alert alert-danger" role="alert">
+    <p>{{ msg }}</p>
+  </div>
 </template>
 
 
 <style>
 p {
-	text-align: center;
-	font-weight: bold;
-	font-size: larger;
+  text-align: center;
+  font-weight: bold;
+  font-size: larger;
 }
 </style>

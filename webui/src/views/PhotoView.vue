@@ -1,40 +1,40 @@
 <script>
-import PhotoCard from '../components/PhotoCard.vue'
+import PhotoCard from '../components/PhotoCard.vue';
 
 export default {
-  name: 'Photo',
-  components: { PhotoCard },
+  name: 'PhotoView',
+  components: {PhotoCard},
   data: function() {
     return {
       loading: false,
       errormsg: null,
       reqId: localStorage.getItem('id'),
       photo: null,
-    }
+    };
   },
   methods: {
     async getPhoto() {
       this.loading = true;
       this.errormsg = null;
       try {
-        let response = await this.$axios.get(this.$route.path);
+        const response = await this.$axios.get('/photos/' + this.$route.params.id);
         this.photo = response.data;
       } catch (e) {
-        switch(e.response.status) {
+        switch (e.response.status) {
           case 400:
-            this.errormsg = "Ops, there was something wrong with your request.";
+            this.errormsg = 'Ops, there was something wrong with your request.';
             break;
           case 401:
-            this.errormsg = "You need to login in order to perform this action.";
+            this.errormsg = 'You need to login in order to perform this action.';
             break;
           case 403:
-            this.errormsg = "Action forbidden.";
+            this.errormsg = 'Action forbidden.';
             break;
           case 404:
-            this.errormsg = "Ops, photo not found.";
+            this.errormsg = 'Ops, photo not found.';
             break;
           case 500:
-            this.errormsg = "Ops, there was an internal problem with the server."
+            this.errormsg = 'Ops, there was an internal problem with the server.';
             break;
           default:
             this.errormsg = e.toString();
@@ -45,8 +45,8 @@ export default {
   },
   mounted() {
     this.getPhoto();
-  }
-}
+  },
+};
 </script>
 
 
@@ -63,7 +63,7 @@ export default {
       <div class="feeds-ctn">
         <div class="posts-ctn">
           <div class="post-ctn" v-if="this.photo">
-            <PhotoCard :photo="this.photo" />
+            <PhotoCard :photoObj="this.photo" />
           </div>
         </div>
       </div>

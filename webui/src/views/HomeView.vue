@@ -1,9 +1,9 @@
 <script>
-import PhotoCard from '../components/PhotoCard.vue'
+import PhotoCard from '../components/PhotoCard.vue';
 
 export default {
-  name: 'Home',
-  components: { PhotoCard },
+  name: 'HomeView',
+  components: {PhotoCard},
   data: function() {
     return {
       loading: false,
@@ -16,37 +16,37 @@ export default {
     };
   },
   methods: {
-      async getMyStream() {
-        this.loading = true;
-        this.errormsg = null;
-        try {
-          let response = await this.$axios.get("/users/" + this.id + "/stream");
-          this.photos = response.data.data;
-        } catch (e) {
-          switch(e.response.status) {
-            case 400:
-              this.errormsg = "Ops, there was something wrong with your request.";
-              break;
-            case 401:
-              this.errormsg = "You need to login in order to perform this action.";
-              break;
-            case 403:
-              this.errormsg = "Action forbidden.";
-              break;
-            case 500:
-              this.errormsg = "Ops, there was an internal problem with the server."
-              break;
-            default:
-              this.errormsg = e.toString();
-          }
+    async getMyStream() {
+      this.loading = true;
+      this.errormsg = null;
+      try {
+        const response = await this.$axios.get('/users/' + this.id + '/stream');
+        this.photos = response.data.data;
+      } catch (e) {
+        switch (e.response.status) {
+          case 400:
+            this.errormsg = 'Ops, there was something wrong with your request.';
+            break;
+          case 401:
+            this.errormsg = 'You need to login in order to perform this action.';
+            break;
+          case 403:
+            this.errormsg = 'Action forbidden.';
+            break;
+          case 500:
+            this.errormsg = 'Ops, there was an internal problem with the server.';
+            break;
+          default:
+            this.errormsg = e.toString();
         }
-        this.loading = false;
-      },
+      }
+      this.loading = false;
     },
+  },
   mounted() {
     this.getMyStream();
-  }
-}
+  },
+};
 </script>
 
 
@@ -63,7 +63,7 @@ export default {
         <div class="feeds-ctn" v-else-if="!this.errormsg">
           <div class="posts-ctn">
             <div v-for="photo in this.photos" :key="photo" class="post-ctn">
-              <PhotoCard :photo="photo" />
+              <PhotoCard :photoObj="photo" />
             </div>
           </div>
         </div>

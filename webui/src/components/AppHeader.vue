@@ -1,32 +1,32 @@
 <script>
-import HomeIcon from './HomeIcon.vue'
-import ProfileIcon from './ProfileIcon.vue'
-import SearchIcon from './SearchIcon.vue'
+import HomeIcon from './HomeIcon.vue';
+import ProfileIcon from './ProfileIcon.vue';
+import SearchIcon from './SearchIcon.vue';
 
 export default {
-  name: 'Header',
-  components: { HomeIcon, SearchIcon, ProfileIcon },
+  name: 'AppHeader',
+  components: {HomeIcon, SearchIcon, ProfileIcon},
   data: function() {
     return {
       loading: false,
       errorMsg: null,
       id: localStorage.getItem('id'),
-      usernameSearch: "",
+      usernameSearch: '',
       users: [],
-    }
+    };
   },
   methods: {
-    logout () {
+    logout() {
       localStorage.removeItem('id');
       localStorage.removeItem('username');
-      this.$router.replace("/login");
+      this.$router.replace('/login');
     },
     searchUser() {
-      this.$router.push({path: "/users", query: { username: this.usernameSearch }});
-      this.usernameSearch = "";
-    }
-  }
-}
+      this.$router.push({path: '/users', query: {username: this.usernameSearch}});
+      this.usernameSearch = '';
+    },
+  },
+};
 </script>
 
 

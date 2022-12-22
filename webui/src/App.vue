@@ -1,17 +1,17 @@
 <script>
-import Header from './components/Header.vue'
+import AppHeader from './components/AppHeader.vue';
 
 export default {
   name: 'App',
-  components: { Header }
-}
+  components: {AppHeader},
+};
 </script>
 
 
 <template>
 <div class="app-ctn">
-	<Header :key="this.$route.fullPath" />
-	<RouterView class="mt-60" :key="this.$route.fullPath" />
+  <AppHeader :key="this.$route.fullPath" />
+  <RouterView class="mt-60" :key="this.$route.fullPath" />
 </div>
 </template>
 

@@ -1,180 +1,184 @@
 <script>
-import CommentIcon from './CommentIcon.vue'
-import EmojiIcon from './EmojiIcon.vue'
-import LikeIcon from './LikeIcon.vue'
-import DeleteIcon from './DeleteIcon.vue'
+import CommentIcon from './CommentIcon.vue';
+import EmojiIcon from './EmojiIcon.vue';
+import LikeIcon from './LikeIcon.vue';
+import DeleteIcon from './DeleteIcon.vue';
 
 export default {
-    name: 'Photo Card',
-    components: { CommentIcon, EmojiIcon, LikeIcon, DeleteIcon },
-    props: {
-        photo: {
-            type: Object,
-        }
+  name: 'PhotoCard',
+  components: {CommentIcon, EmojiIcon, LikeIcon, DeleteIcon},
+  props: {
+    photoObj: {
+      type: Object,
     },
-    data: function() {
-        return {
-            loading: false,
-            errormsg: null,
-            reqId: localStorage.getItem('id'),
-            hasLike: false,
-            commentsVisibility: false,
-            commentText: '',
-        };
+  },
+  data: function() {
+    return {
+      loading: false,
+      errormsg: null,
+      photo: this.photoObj,
+      reqId: localStorage.getItem('id'),
+      hasLike: false,
+      commentsVisibility: false,
+      commentText: '',
+    };
   },
   methods: {
-      showComments() {
-        if (this.photo.comments.count > 0) {
-          this.commentsVisibility = true;
-        }
-        else 
-          this.commentsVisibility = false;
-      },
-      async likeAction() {
-        if (this.reqId == this.photo.owner.id) {
-            return;
-        }
-        this.loading = true;
-        this.errormsg = null;
-        try {
-          if (this.hasLike) {
-            await this.$axios.delete("/photos/" + this.photo.id + "/likes/" + this.reqId);
-            this.photo.likes.count--;
-          } else {
-            await this.$axios.put("/photos/" + this.photo.id + "/likes/" + this.reqId);
-            this.photo.likes.count++;
-          }
-        } catch (e) {
-          switch(e.response.status) {
-            case 400:
-              this.errormsg = "Ops, there was something wrong with your request.";
-              break;
-            case 401:
-              this.errormsg = "You need to login in order to perform this action.";
-              break;
-            case 403:
-              this.errormsg = "Action forbidden.";
-              break;
-            case 404:
-              this.errormsg = "Ops, photo not found.";
-              break;
-            case 500:
-              this.errormsg = "Ops, there was an internal problem with the server."
-              break;
-            default:
-              this.errormsg = e.toString();
-          }
-        }
-        this.loading = false;
-        this.hasLike = !this.hasLike;
-      },
-      checkLike() {
-            if (this.reqId != this.photo.owner.id) {
-                for (let user of this.photo.likes.users) {
-                    if (user.id == this.reqId)
-                    this.hasLike = true;
-                    return;
-                }
-            }
-            this.hasLike = false;
-        },
-      async commentPhoto() {
-        this.loading = true;
-        this.errormsg = null;
-        try {
-            let response = await this.$axios.post("/photos/" + this.photo.id + "/comments", {text: this.commentText});
-            this.photo.comments.count++;
-            this.photo.comments.comments.push(response.data);
-            this.commentsVisibility = true;
-        } catch (e) {
-          switch(e.response.status) {
-            case 400:
-              this.errormsg = "Ops, there was something wrong with your request.";
-              break;
-            case 401:
-              this.errormsg = "You need to login in order to perform this action.";
-              break;
-            case 403:
-              this.errormsg = "Action forbidden.";
-              break;
-            case 404:
-              this.errormsg = "Ops, photo not found.";
-              break;
-            case 500:
-              this.errormsg = "Ops, there was an internal problem with the server."
-              break;
-            default:
-              this.errormsg = e.toString();
-          }
-        }
-        this.loading = false;
-        this.commentText = "";
-      },
-      async uncommentPhoto(comment_id) {
-        this.loading = true;
-        this.errormsg = null;
-        try {
-            await this.$axios.delete("/photos/" + this.photo.id + "/comments/" + comment_id);
-            this.photo.comments.comments = this.photo.comments.comments.filter(function (comment) { return comment_id != comment.id; });
-            this.photo.comments.count--;
-            this.commentsVisibility = this.photo.comments.count > 0 ? this.commentVisibility : false;
-        } catch (e) {
-          switch(e.response.status) {
-            case 400:
-              this.errormsg = "Ops, there was something wrong with your request.";
-              break;
-            case 401:
-              this.errormsg = "You need to login in order to perform this action.";
-              break;
-            case 403:
-              this.errormsg = "Action forbidden.";
-              break;
-            case 404:
-              this.errormsg = "Ops, photo or comment not found.";
-              break;
-            case 500:
-              this.errormsg = "Ops, there was an internal problem with the server."
-              break;
-            default:
-              this.errormsg = e.toString();
-          }
-        }
-        this.loading = false;
-      },
-      async deletePhoto() {
-        this.loading = true;
-        this.errormsg = null;
-        try {
-            await this.$axios.delete("/photos/" + this.photo.id);
-        } catch (e) {
-          switch(e.response.status) {
-            case 400:
-              this.errormsg = "Ops, there was something wrong with your request.";
-              break;
-            case 401:
-              this.errormsg = "You need to login in order to perform this action.";
-              break;
-            case 403:
-              this.errormsg = "Action forbidden.";
-              break;
-            case 404:
-              this.errormsg = "Ops, uphoto not found";
-              break;
-            case 500:
-              this.errormsg = "Ops, there was an internal problem with the server."
-              break;
-            default:
-              this.errormsg = e.toString();
-          }
-        }
-        this.loading = false;
-        this.$router.go(-1);
-      },
+    showComments() {
+      if (this.photo.comments.count > 0) {
+        this.commentsVisibility = true;
+      } else {
+        this.commentsVisibility = false;
+      }
     },
+    async likeAction() {
+      if (this.reqId == this.photo.owner.id) {
+        return;
+      }
+      this.loading = true;
+      this.errormsg = null;
+      try {
+        if (this.hasLike) {
+          await this.$axios.delete('/photos/' + this.photo.id + '/likes/' + this.reqId);
+          this.photo.likes.count--;
+        } else {
+          await this.$axios.put('/photos/' + this.photo.id + '/likes/' + this.reqId);
+          this.photo.likes.count++;
+        }
+      } catch (e) {
+        switch (e.response.status) {
+          case 400:
+            this.errormsg = 'Ops, there was something wrong with your request.';
+            break;
+          case 401:
+            this.errormsg = 'You need to login in order to perform this action.';
+            break;
+          case 403:
+            this.errormsg = 'Action forbidden.';
+            break;
+          case 404:
+            this.errormsg = 'Ops, photo not found.';
+            break;
+          case 500:
+            this.errormsg = 'Ops, there was an internal problem with the server.';
+            break;
+          default:
+            this.errormsg = e.toString();
+        }
+      }
+      this.loading = false;
+      this.hasLike = !this.hasLike;
+    },
+    checkLike() {
+      if (this.reqId != this.photo.owner.id) {
+        for (const user of this.photo.likes.users) {
+          if (user.id == this.reqId) {
+            this.hasLike = true;
+          }
+          return;
+        }
+      }
+      this.hasLike = false;
+    },
+    async commentPhoto() {
+      this.loading = true;
+      this.errormsg = null;
+      try {
+        const response = await this.$axios.post('/photos/' + this.photo.id + '/comments', {text: this.commentText});
+        this.photo.comments.count++;
+        this.photo.comments.comments.push(response.data);
+        this.commentsVisibility = true;
+      } catch (e) {
+        switch (e.response.status) {
+          case 400:
+            this.errormsg = 'Ops, there was something wrong with your request.';
+            break;
+          case 401:
+            this.errormsg = 'You need to login in order to perform this action.';
+            break;
+          case 403:
+            this.errormsg = 'Action forbidden.';
+            break;
+          case 404:
+            this.errormsg = 'Ops, photo not found.';
+            break;
+          case 500:
+            this.errormsg = 'Ops, there was an internal problem with the server.';
+            break;
+          default:
+            this.errormsg = e.toString();
+        }
+      }
+      this.loading = false;
+      this.commentText = '';
+    },
+    async uncommentPhoto(commentId) {
+      this.loading = true;
+      this.errormsg = null;
+      try {
+        await this.$axios.delete('/photos/' + this.photo.id + '/comments/' + commentId);
+        this.photo.comments.comments = this.photo.comments.comments.filter(function(comment) {
+          return commentId != comment.id;
+        });
+        this.photo.comments.count--;
+        this.commentsVisibility = this.photo.comments.count > 0 ? this.commentVisibility : false;
+      } catch (e) {
+        switch (e.response.status) {
+          case 400:
+            this.errormsg = 'Ops, there was something wrong with your request.';
+            break;
+          case 401:
+            this.errormsg = 'You need to login in order to perform this action.';
+            break;
+          case 403:
+            this.errormsg = 'Action forbidden.';
+            break;
+          case 404:
+            this.errormsg = 'Ops, photo or comment not found.';
+            break;
+          case 500:
+            this.errormsg = 'Ops, there was an internal problem with the server.';
+            break;
+          default:
+            this.errormsg = e.toString();
+        }
+      }
+      this.loading = false;
+    },
+    async deletePhoto() {
+      this.loading = true;
+      this.errormsg = null;
+      try {
+        await this.$axios.delete('/photos/' + this.photo.id);
+      } catch (e) {
+        switch (e.response.status) {
+          case 400:
+            this.errormsg = 'Ops, there was something wrong with your request.';
+            break;
+          case 401:
+            this.errormsg = 'You need to login in order to perform this action.';
+            break;
+          case 403:
+            this.errormsg = 'Action forbidden.';
+            break;
+          case 404:
+            this.errormsg = 'Ops, uphoto not found';
+            break;
+          case 500:
+            this.errormsg = 'Ops, there was an internal problem with the server.';
+            break;
+          default:
+            this.errormsg = e.toString();
+        }
+      }
+      this.loading = false;
+      this.$router.go(-1);
+    },
+  },
   mounted() {
     this.checkLike();
-  }
-}
+  },
+};
 </script>
 
 <template>
@@ -204,12 +208,12 @@ export default {
                 <LikeIcon :active="this.hasLike" />
               </button>
               <button @click="showComments(this.photo.id)">
-                <svg aria-label="Comment" class="_8-yf5 " color="#262626" fill="#262626" height="24" role="img" viewBox="0 0 24 24" width="24"><path d="M20.656 17.008a9.993 9.993 0 10-3.59 3.615L22 22z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="2"></path></svg>
+                <CommentIcon />
               </button>
             </div>
           </div>
           <div class="likes-count">
-            <router-link :to="'/photos/' + this.photo.id + '/likes'" v-bind:class="{disabled: this.photo.likes.count == 0}" style="color: black; text-decoration: none;"> 
+            <router-link :to="'/photos/' + this.photo.id + '/likes'" v-bind:class="{disabled: this.photo.likes.count == 0}" style="color: black; text-decoration: none;">
               {{ this.photo.likes.count }} likes
             </router-link>
           </div>
@@ -218,7 +222,7 @@ export default {
               View all {{ this.photo.comments.count }} comments
             </button>
             <div v-if="this.commentsVisibility" class="comments">
-              <div class="comment" v-for="comment in this.photo.comments.comments">
+              <div class="comment" v-for="comment in this.photo.comments.comments" :key="comment">
                 <div class="comment-content">
                   <div class="comment-header">
                     <div>
@@ -353,34 +357,34 @@ export default {
   margin-top: 5px;
   padding: 2px;
 }
- 
+
 .comment {
   display: flex;
   margin-bottom: 5px;
 }
- 
+
 .comment-content {
   flex: 1;
 }
- 
+
 .comment-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 3px;
 }
- 
+
 .username {
   font-weight: bold;
   margin-right: 0px;
 }
- 
+
 .timestamp {
   color: #999;
   font-size: 12px;
   margin: 40px;
 }
- 
+
 .comment-text {
   color: #333;
   font-size: 14px;

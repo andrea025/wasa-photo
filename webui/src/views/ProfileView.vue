@@ -1,264 +1,263 @@
 <script>
-import NewPostIcon from "../components/NewPostIcon.vue"
+import NewPostIcon from '../components/NewPostIcon.vue';
 
 export default {
-  name: 'Profile',
-  components: { NewPostIcon },
+  name: 'ProfileView',
+  components: {NewPostIcon},
   data: function() {
-      return {
-        errormsg: null,
-		    loading: false,
-        reqId: localStorage.getItem('id'),
-        id: "",
-        username: "",
-        followersCount: null,
-        followingCount: null,
-        uploadedPhotos: null,
-        photos: [],
-        followers: [],
-        following: [],
-        banned: [],
-        isFollowing: null,
-        isBanned: null,
-      };
+    return {
+      errormsg: null,
+      loading: false,
+      reqId: localStorage.getItem('id'),
+      id: '',
+      username: '',
+      followersCount: null,
+      followingCount: null,
+      uploadedPhotos: null,
+      photos: [],
+      followers: [],
+      following: [],
+      banned: [],
+      isFollowing: null,
+      isBanned: null,
+    };
+  },
+  methods: {
+    async getUserProfile() {
+      this.loading = true;
+      this.errormsg = null;
+      try {
+        const response = await this.$axios.get('/users/' + this.$route.params.id);
+        this.id = response.data.id;
+        this.username = response.data.username;
+        this.followersCount = response.data.followers;
+        this.followingCount = response.data.following;
+        this.uploadedPhotos = response.data.uploaded_photos;
+        this.photos = response.data.photos;
+      } catch (e) {
+        switch (e.response.status) {
+          case 400:
+            this.errormsg = 'Ops, there was something wrong with your request.';
+            break;
+          case 401:
+            this.errormsg = 'You need to login in order to perform this action.';
+            break;
+          case 403:
+            this.errormsg = 'Action forbidden.';
+            break;
+          case 404:
+            this.errormsg = 'Ops, user not found.';
+            break;
+          case 500:
+            this.errormsg = 'Ops, there was an internal problem with the server.';
+            break;
+          default:
+            this.errormsg = e.toString();
+        }
+        this.loading = false;
+        return;
+      }
+      if (this.reqId != this.id) {
+        await this.checkFollowing();
+        await this.checkBanned();
+      }
+      this.loading = false;
     },
-    methods: {
-      async getUserProfile() {
-        this.loading = true;
-        this.errormsg = null;
-        try {
-          let response = await this.$axios.get(this.$route.path);
-          this.id = response.data.id;
-          this.username = response.data.username;
-          this.followersCount = response.data.followers;
-          this.followingCount = response.data.following;
-          this.uploadedPhotos = response.data.uploaded_photos;
-          this.photos = response.data.photos;
-        } catch (e) {
-          switch(e.response.status) {
-            case 400:
-              this.errormsg = "Ops, there was something wrong with your request.";
-              break;
-            case 401:
-              this.errormsg = "You need to login in order to perform this action.";
-              break;
-            case 403:
-              this.errormsg = "Action forbidden.";
-              break;
-            case 404:
-              this.errormsg = "Ops, user not found.";
-              break;
-            case 500:
-              this.errormsg = "Ops, there was an internal problem with the server."
-              break;
-            default:
-              this.errormsg = e.toString();
-          }
-          this.loading = false;
-          return;
+    async getFollowers() {
+      this.loading = true;
+      this.errormsg = null;
+      try {
+        const response = await this.$axios.get('/users/' + this.$route.params.id + '/followers');
+        this.followers = response.data.data;
+      } catch (e) {
+        switch (e.response.status) {
+          case 400:
+            this.errormsg = 'Ops, there was something wrong with your request.';
+            break;
+          case 401:
+            this.errormsg = 'You need to login in order to perform this action.';
+            break;
+          case 404:
+            this.errormsg = 'Ops, user not found.';
+            break;
+          case 500:
+            this.errormsg = 'Ops, there was an internal problem with the server.';
+            break;
+          default:
+            this.errormsg = e.toString();
         }
-        if (this.reqId != this.id) {
-          await this.checkFollowing();
-          await this.checkBanned();
+      }
+      this.loading = false;
+    },
+    async getBanned(id) {
+      this.loading = true;
+      this.errormsg = null;
+      try {
+        const response = await this.$axios.get('/users/' + id + '/banned');
+        this.banned = response.data.data;
+      } catch (e) {
+        switch (e.response.status) {
+          case 400:
+            this.errormsg = 'Ops, there was something wrong with your request.';
+            break;
+          case 401:
+            this.errormsg = 'You need to login in order to perform this action.';
+            break;
+          case 403:
+            this.errormsg = 'Action forbidden: you cannot see the list of banned users of another user.';
+          case 404:
+            this.errormsg = 'Ops, user not found.';
+            break;
+          case 500:
+            this.errormsg = 'Ops, there was an internal problem with the server.';
+            break;
+          default:
+            this.errormsg = e.toString();
         }
-        this.loading = false;
-      },
-      async getFollowers() {
-        this.loading = true;
-        this.errormsg = null;
-        try {
-          let response = await this.$axios.get(this.$route.path + "/followers");
-          this.followers = response.data.data;
-        } catch (e) {
-          switch(e.response.status) {
-            case 400:
-              this.errormsg = "Ops, there was something wrong with your request.";
-              break;
-            case 401:
-              this.errormsg = "You need to login in order to perform this action.";
-              break;
-            case 404:
-              this.errormsg = "Ops, user not found.";
-              break;
-            case 500:
-              this.errormsg = "Ops, there was an internal problem with the server."
-              break;
-            default:
-              this.errormsg = e.toString();
-          }
+      }
+      this.loading = false;
+    },
+    async checkFollowing() {
+      await this.getFollowers();
+      for (const follower of this.followers) {
+        if (follower.id == this.reqId) {
+          this.isFollowing = true;
         }
-        this.loading = false;
-      },
-      async getBanned(id) {
-        this.loading = true;
-        this.errormsg = null;
-        try {
-          let response = await this.$axios.get("/users/" + id + "/banned");
-          this.banned = response.data.data;
-        } catch (e) {
-          switch(e.response.status) {
-            case 400:
-              this.errormsg = "Ops, there was something wrong with your request.";
-              break;
-            case 401:
-              this.errormsg = "You need to login in order to perform this action.";
-              break;
-            case 403:
-              this.errormsg = "Action forbidden: you cannot see the list of banned users of another user."
-            case 404:
-              this.errormsg = "Ops, user not found.";
-              break;
-            case 500:
-              this.errormsg = "Ops, there was an internal problem with the server."
-              break;
-            default:
-              this.errormsg = e.toString();
-          }
+      }
+    },
+    async checkBanned() {
+      await this.getBanned(this.reqId);
+      for (const ban of this.banned) {
+        if (ban.id == this.id) {
+          this.isBanned = true;
         }
-        this.loading = false;
-      },
-      async checkFollowing() {
-        await this.getFollowers();
-        for (let follower of this.followers) {
-          if (follower.id == this.reqId) 
-            this.isFollowing = true;
+      }
+    },
+    async followAction() {
+      this.loading = true;
+      this.errormsg = null;
+      try {
+        if (this.isFollowing) {
+          await this.$axios.delete('/users/' + this.reqId + '/following/' + this.id);
+          this.followersCount--;
+        } else {
+          await this.$axios.put('/users/' + this.reqId + '/following/' + this.id);
+          this.followersCount++;
         }
-      },
-      async checkBanned() {
-        await this.getBanned(this.reqId);
-        for (let ban of this.banned) {
-          if (ban.id == this.id) 
-            this.isBanned = true;
+      } catch (e) {
+        switch (e.response.status) {
+          case 400:
+            this.errormsg = 'Ops, there was something wrong with your request.';
+            break;
+          case 401:
+            this.errormsg = 'You need to login in order to perform this action.';
+            break;
+          case 403:
+            this.errormsg = 'Action forbidden.';
+            break;
+          case 404:
+            this.errormsg = 'Ops, user not found.';
+            break;
+          case 500:
+            this.errormsg = 'Ops, there was an internal problem with the server.';
+            break;
+          default:
+            this.errormsg = e.toString();
         }
-      },
-      async followAction() {
-        this.loading = true;
-        this.errormsg = null;
-        try {
-          if (this.isFollowing) {
-            await this.$axios.delete("/users/" + this.reqId + "/following/" + this.id);
-            this.followersCount--;
-          } else {
-            await this.$axios.put("/users/" + this.reqId + "/following/" + this.id);
-            this.followersCount++;
-          }
-        } catch (e) {
-          switch(e.response.status) {
-            case 400:
-              this.errormsg = "Ops, there was something wrong with your request.";
-              break;
-            case 401:
-              this.errormsg = "You need to login in order to perform this action.";
-              break;
-            case 403:
-              this.errormsg = "Action forbidden.";
-              break;
-            case 404:
-              this.errormsg = "Ops, user not found.";
-              break;
-            case 500:
-              this.errormsg = "Ops, there was an internal problem with the server."
-              break;
-            default:
-              this.errormsg = e.toString();
-          }
+      }
+      this.loading = false;
+      this.isFollowing = !this.isFollowing;
+    },
+    async banAction() {
+      this.loading = true;
+      this.errormsg = null;
+      try {
+        if (this.isBanned) {
+          await this.$axios.delete('/users/' + this.reqId + '/banned/' + this.id);
+        } else {
+          await this.$axios.put('/users/' + this.reqId + '/banned/' + this.id);
         }
-        this.loading = false;
-        this.isFollowing = !this.isFollowing;
-      },
-      async banAction() {
-        this.loading = true;
-        this.errormsg = null;
-        try {
-          if (this.isBanned) {
-            await this.$axios.delete("/users/" + this.reqId + "/banned/" + this.id);
-          } else {
-            await this.$axios.put("/users/" + this.reqId + "/banned/" + this.id);
-          }
-        } catch (e) {
-          switch(e.response.status) {
-            case 400:
-              this.errormsg = "Ops, there was something wrong with your request.";
-              break;
-            case 401:
-              this.errormsg = "You need to login in order to perform this action.";
-              break;
-            case 403:
-              this.errormsg = "Action forbidden.";
-              break;
-            case 404:
-              this.errormsg = "Ops, user not found.";
-              break;
-            case 500:
-              this.errormsg = "Ops, there was an internal problem with the server."
-              break;
-            default:
-              this.errormsg = e.toString();
-          }
+      } catch (e) {
+        switch (e.response.status) {
+          case 400:
+            this.errormsg = 'Ops, there was something wrong with your request.';
+            break;
+          case 401:
+            this.errormsg = 'You need to login in order to perform this action.';
+            break;
+          case 403:
+            this.errormsg = 'Action forbidden.';
+            break;
+          case 404:
+            this.errormsg = 'Ops, user not found.';
+            break;
+          case 500:
+            this.errormsg = 'Ops, there was an internal problem with the server.';
+            break;
+          default:
+            this.errormsg = e.toString();
         }
-        this.loading = false;
-        this.isBanned = !this.isBanned;
-      },
-      getPhoto(photo_id) {
-        this.$router.push("/photos/" + photo_id);
-      },
-      onPickFile() {
-        this.$refs.fileInput.click();
-      },
-      async onFilePicked(event) {
-        const files = event.target.files;
-        const fileReader = new FileReader();
-        fileReader.addEventListener('load', function() {
-          this.imageUrl = fileReader.result;
+      }
+      this.loading = false;
+      this.isBanned = !this.isBanned;
+    },
+    getPhoto(photoId) {
+      this.$router.push('/photos/' + photoId);
+    },
+    onPickFile() {
+      this.$refs.fileInput.click();
+    },
+    async onFilePicked(event) {
+      const files = event.target.files;
+      const fileReader = new FileReader();
+      fileReader.readAsDataURL(files[0]);
+      const image = files[0];
+
+      if (!['image/jpeg', 'image/png'].includes(image.type)) {
+        console.log(image.type);
+        this.errormsg = 'File type not supported, please upload a png or jpeg image.';
+        return;
+      }
+
+      this.loading = true;
+      try {
+        await this.$axios.post('/users/' + this.id + '/photos', image, {
+          headers: {
+            'Content-Type': image.type,
+          },
         });
-        fileReader.readAsDataURL(files[0]);
-        let image = files[0];
-
-        if (!["image/jpeg", "image/png"].includes(image.type)) {
-          console.log(image.type)
-          this.errormsg = "File type not supported, please upload a png or jpeg image."
-          return;
+      } catch (e) {
+        switch (e.response.status) {
+          case 400:
+            this.errormsg = 'Ops, there was something wrong with your request.';
+            break;
+          case 401:
+            this.errormsg = 'You need to login in order to perform this action.';
+            break;
+          case 403:
+            this.errormsg = 'Action forbidden.';
+            break;
+          case 404:
+            this.errormsg = 'Ops, user not found.';
+            break;
+          case 413:
+            this.errormsg = 'The selected image is too large.';
+            break;
+          case 500:
+            this.errormsg = 'Ops, there was an internal problem with the server.';
+            break;
+          default:
+            this.errormsg = e.toString();
         }
-
-        this.loading = true;
-        try {
-          let response = await this.$axios.post('/users/' + this.id + '/photos', image, {
-            headers: {
-              'Content-Type': image.type,
-            }
-          });
-        } catch(e) {
-          switch(e.response.status) {
-            case 400:
-              this.errormsg = "Ops, there was something wrong with your request.";
-              break;
-            case 401:
-              this.errormsg = "You need to login in order to perform this action.";
-              break;
-            case 403:
-              this.errormsg = "Action forbidden.";
-              break;
-            case 404:
-              this.errormsg = "Ops, user not found.";
-              break;
-            case 413:
-              this.errormsg = "The selected image is too large.";
-              break;
-            case 500:
-              this.errormsg = "Ops, there was an internal problem with the server."
-              break;
-            default:
-              this.errormsg = e.toString();
-          }
-        }
-        this.$router.go(0);
-        this.loading = false;
-      },
+      }
+      this.$router.go(0);
+      this.loading = false;
     },
-    mounted() {
+  },
+  mounted() {
 		  this.getUserProfile();
 	  },
-}
+};
 </script>
 
 <template>
@@ -313,10 +312,10 @@ export default {
       </div>
       <div class="user-content">
         <div class="tab-layout">
-          <router-link :class="{'clear-btn': true, active: $route.name === 'profile'}" :to="this.$route.path">
+          <div :class="{'clear-btn': true, active: $route.name === 'profile'}">
             <svg aria-label="" class="_8-yf5 " color="#8e8e8e" fill="#8e8e8e" height="12" role="img" viewBox="0 0 24 24" width="12"><rect fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="18" x="3" y="3"></rect><line fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="9.015" x2="9.015" y1="3" y2="21"></line><line fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="14.985" x2="14.985" y1="3" y2="21"></line><line fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="21" x2="3" y1="9.015" y2="9.015"></line><line fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="21" x2="3" y1="14.985" y2="14.985"></line></svg>
             PHOTOS
-          </router-link>
+          </div>
         </div>
         <div class="grid" v-if="$route.name === 'profile'">
           <div v-for="photo in this.photos" :key="photo" class="grid-item">
@@ -398,7 +397,7 @@ export default {
   .user-stat {
     margin-right: 40px;
   }
- 
+
 .follow-btn, .ban-btn {
   font-family: 'Helvetica Neue', sans-serif;
   font-size: 14px;
