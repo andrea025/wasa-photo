@@ -32,7 +32,6 @@ export default {
 	  }
 	  this.loading = false;
       localStorage.setItem('id', this.id);
-      localStorage.setItem('username', this.username);
       this.$router.replace('/home');
     },
     checkRedirect() {

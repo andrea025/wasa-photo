@@ -146,6 +146,16 @@ func run() error {
 		logger.Infof("stopping API server")
 	}()
 
+	// Create storage for photos
+	path := "./storage"
+	if _, err = os.Stat(path); errors.Is(err, os.ErrNotExist) {
+		err := os.Mkdir(path, os.ModePerm)
+		if err != nil {
+			logger.WithError(err).Error("error creating storage for photos")
+			return fmt.Errorf("creating storage for photos: %w", err)
+		}
+	}
+
 	// Create and start the file server listening for requests in a separate goroutine
 	go func() {
 		logger.Infof("File Server listening on %s", cfg.File.FileHost)

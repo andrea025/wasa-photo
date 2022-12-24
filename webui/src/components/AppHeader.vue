@@ -17,8 +17,7 @@ export default {
   },
   methods: {
     logout() {
-      localStorage.removeItem('id');
-      localStorage.removeItem('username');
+      localStorage.clear();
       this.$router.replace('/login');
     },
     searchUser() {
