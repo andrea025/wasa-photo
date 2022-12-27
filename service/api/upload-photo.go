@@ -17,7 +17,7 @@ import (
 	"wasa-photo.uniroma1.it/wasa-photo/service/database"
 )
 
-var fileServerBasePath string = "http://0.0.0.0:3001/"
+var fileServerBasePath string = "http://0.0.0.0:3000/storage/"
 var storageBasePath string = "./storage/"
 
 type Photo struct {
