@@ -20,6 +20,7 @@ export default {
       banned: [],
       isFollowing: null,
       isBanned: null,
+      photoBaseUrl: __API_URL__,
     };
   },
   methods: {
@@ -321,7 +322,7 @@ export default {
           <div v-for="photo in this.photos" :key="photo" class="grid-item">
             <div :class="{ 'post-grid-ctn': true }">
               <div class="image">
-                <img :src="photo.photo_url" alt="">
+                <img :src="this.photoBaseUrl+photo.photo_url" alt="">
               </div>
               <div class="image-overlay" @click="this.getPhoto(photo.id)">
                 <div class="post-count">

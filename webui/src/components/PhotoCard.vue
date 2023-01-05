@@ -21,6 +21,7 @@ export default {
       hasLike: false,
       commentsVisibility: false,
       commentText: '',
+      photoBaseUrl: __API_URL__,
     };
   },
   methods: {
@@ -198,7 +199,7 @@ export default {
         </div>
         <div class="post-media">
           <div class="post-image-ctn">
-            <img :src="this.photo.photo_url" id="photo" @dblclick="this.likeAction()">
+            <img :src="this.photoBaseUrl+this.photo.photo_url" id="photo" @dblclick="this.likeAction()">
           </div>
         </div>
         <div class="post-desc">
