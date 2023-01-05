@@ -17,7 +17,7 @@ import (
 	"wasa-photo.uniroma1.it/wasa-photo/service/database"
 )
 
-var fileServerBasePath string = "http://0.0.0.0:3000/storage/"
+var fileBaseUrl string = "http://localhost:3000/storage/"
 var storageBasePath string = "./storage/"
 
 type Photo struct {
@@ -136,7 +136,7 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	var photo Photo
 	creation := (time.Now()).Format(time.RFC3339)
 	creation_datetime := creation[0:10] + " " + creation[11:19] // correct format
-	url := fileServerBasePath + filename
+	url := fileBaseUrl + filename
 
 	dbphoto, erro := rt.db.UploadPhoto(pid, creation_datetime, url, strings.Split(r.Header.Get("Authorization"), "Bearer ")[1])
 	if erro != nil {

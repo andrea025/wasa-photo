@@ -8,5 +8,5 @@ import (
 )
 
 func (rt *_router) getFilePhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
-	http.ServeFile(w, r, "./storage/"+ps.ByName("filename"))
+	http.ServeFile(w, r, storageBasePath+ps.ByName("filename"))
 }
